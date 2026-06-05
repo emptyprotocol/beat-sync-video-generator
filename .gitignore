@@ -1,0 +1,16 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Dependencies (if any are added later)
+node_modules/
+
+# Build / output
+dist/
+build/
+
+# Local recordings / exports
+*.webm
+*.mp4

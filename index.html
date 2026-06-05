@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beat-Sync Video Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Background glowing ambient spots -->
+    <div class="glow-bg">
+        <div class="glow-sphere glow-sphere-1"></div>
+        <div class="glow-sphere glow-sphere-2"></div>
+        <div class="glow-sphere glow-sphere-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-compact-disc spin-slow"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>BEAT<span class="gradient-text">SYNC</span></h1>
+                    <span class="subtitle">REAL-TIME VIDEO SYNTHESIZER</span>
+                </div>
+            </div>
+            <div class="status-panel">
+                <div class="system-status">
+                    <span class="status-dot online"></span>
+                    <span class="status-text" id="system-status-text">SYSTEM READY</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main-grid">
+            
+            <!-- LEFT PANEL: SOURCE AUDIO & TRACK PROPERTIES -->
+            <section class="panel panel-left" id="audio-panel">
+                <div class="panel-header">
+                    <i class="fa-solid fa-music panel-icon"></i>
+                    <h2>Audio Source</h2>
+                </div>
+                <div class="panel-body">
+                    <!-- Drag and Drop Zone -->
+                    <div class="upload-zone" id="drop-zone">
+                        <input type="file" id="audio-input" accept="audio/*" class="file-input">
+                        <div class="upload-zone-content">
+                            <div class="upload-icon-wrapper">
+                                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            </div>
+                            <h3>Drag & drop audio here</h3>
+                            <p>or <span class="browse-link">browse files</span></p>
+                            <span class="file-limits">Supports MP3, WAV, FLAC, M4A</span>
+                        </div>
+                        <div class="upload-success-state" style="display: none;">
+                            <div class="success-icon-wrapper">
+                                <i class="fa-solid fa-circle-check success-icon animate-bounce"></i>
+                            </div>
+                            <h3>File Imported</h3>
+                            <p class="file-name-display" id="uploaded-file-name">track_name.mp3</p>
+                            <button type="button" class="change-file-btn" id="change-audio-btn">
+                                <i class="fa-solid fa-arrows-rotate"></i> Change File
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Track Metadata & Properties Display -->
+                    <div class="track-card glass-card">
+                        <div class="track-card-header">
+                            <div class="music-note-glowing">
+                                <i class="fa-solid fa-wave-square"></i>
+                            </div>
+                            <div class="track-meta">
+                                <h4 id="track-title">No Track Loaded</h4>
+                                <p id="track-artist">Select an audio file to begin</p>
+                            </div>
+                        </div>
+                        <div class="track-properties-grid">
+                            <div class="prop-box">
+                                <span class="prop-label">DURATION</span>
+                                <span class="prop-value" id="track-duration">--:--</span>
+                            </div>
+                            <div class="prop-box highlight-purple">
+                                <span class="prop-label">BPM SPEED</span>
+                                <span class="prop-value" id="bpm-display">--</span>
+                            </div>
+                            <div class="prop-box">
+                                <span class="prop-label">BITRATE</span>
+                                <span class="prop-value" id="track-bitrate">-- kbps</span>
+                            </div>
+                            <div class="prop-box">
+                                <span class="prop-label">FREQUENCY</span>
+                                <span class="prop-value" id="track-sample-rate">-- Hz</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CENTER PANEL: VISUALIZER PORT -->
+            <section class="panel panel-center" id="visualizer-viewport-panel">
+                <div class="panel-header flex-between">
+                    <div class="flex-align-center">
+                        <i class="fa-solid fa-circle-play panel-icon text-cyan"></i>
+                        <h2>Viewport Render</h2>
+                    </div>
+                    <div class="viewport-hud">
+                        <span class="hud-item"><i class="fa-solid fa-expand"></i> 1920x1080</span>
+                        <span class="hud-item fps-counter"><i class="fa-solid fa-bolt"></i> <span id="fps-val">60</span> FPS</span>
+                    </div>
+                </div>
+                <div class="panel-body flex-column">
+                    <!-- Canvas Box with Glowing Overlay -->
+                    <div class="canvas-viewport glass-card">
+                        <canvas id="visualizer-canvas"></canvas>
+                        
+                        <!-- Visualizer HUD Overlay -->
+                        <div class="canvas-overlay-hud">
+                            <div class="overlay-left">
+                                <div class="badge-hud theme-badge">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="hud-theme-name">COSMIC PULSE</span>
+                                </div>
+                            </div>
+                            <div class="overlay-right">
+                                <div class="badge-hud time-badge" id="hud-time-badge">00:00.00</div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State visualizer indicator -->
+                        <div class="canvas-empty-state" id="canvas-placeholder">
+                            <div class="pulsing-radar">
+                                <div class="radar-circle rc1"></div>
+                                <div class="radar-circle rc2"></div>
+                                <div class="radar-circle rc3"></div>
+                                <i class="fa-solid fa-desktop monitor-icon"></i>
+                            </div>
+                            <p>Visualizer Standby. Load audio to start rendering.</p>
+                        </div>
+                    </div>
+
+                    <!-- Playback Controls -->
+                    <div class="playback-controls-bar glass-card">
+                        <div class="scrubber-container">
+                            <span class="time-label current" id="current-time">0:00</span>
+                            <div class="slider-wrapper">
+                                <input type="range" id="track-progress" class="scrubber-slider" min="0" max="100" value="0">
+                                <div class="progress-bar-fill" id="scrubber-progress-fill"></div>
+                            </div>
+                            <span class="time-label duration" id="total-time">0:00</span>
+                        </div>
+                        <div class="controls-row">
+                            <div class="volume-control">
+                                <button class="btn-icon" id="mute-btn" title="Mute/Unmute">
+                                    <i class="fa-solid fa-volume-high" id="volume-icon"></i>
+                                </button>
+                                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05" value="0.8">
+                            </div>
+                            
+                            <div class="play-actions">
+                                <button class="control-btn secondary" id="stop-btn" title="Stop">
+                                    <i class="fa-solid fa-stop"></i>
+                                </button>
+                                <button class="control-btn primary play-pause" id="play-btn" title="Play">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <button class="control-btn primary play-pause" id="pause-btn" title="Pause" style="display: none;">
+                                    <i class="fa-solid fa-pause"></i>
+                                </button>
+                            </div>
+
+                            <div class="visualizer-quick-toggles">
+                                <button class="btn-icon" id="toggle-fullscreen" title="Fullscreen Viewport">
+                                    <i class="fa-solid fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: CONTROLS & THEME SETTINGS -->
+            <section class="panel panel-right" id="settings-panel">
+                <div class="panel-header">
+                    <i class="fa-solid fa-sliders panel-icon"></i>
+                    <h2>Render Settings</h2>
+                </div>
+                <div class="panel-body flex-column gap-lg">
+                    <!-- Theme Selector Section -->
+                    <div class="settings-group">
+                        <label class="group-label">VISUALIZER THEME</label>
+                        
+                        <!-- Real hidden/compatible select element for JS compatibility -->
+                        <div class="select-wrapper-hidden" style="display: none;">
+                            <select id="theme-select">
+                                <option value="cosmic" selected>Cosmic Pulse</option>
+                                <option value="cyber">Cyber Grid</option>
+                                <option value="warp">Warp Tunnel</option>
+                            </select>
+                        </div>
+
+                        <!-- Styled Premium Selection Cards -->
+                        <div class="theme-cards-container">
+                            <div class="theme-card active" data-theme="cosmic">
+                                <div class="theme-card-glow"></div>
+                                <div class="theme-card-icon">
+                                    <i class="fa-solid fa-bahai"></i>
+                                </div>
+                                <div class="theme-card-info">
+                                    <h4>Cosmic Pulse</h4>
+                                    <p>Fluid, pulsing nebula particles mapping beats</p>
+                                </div>
+                                <div class="theme-card-active-dot"></div>
+                            </div>
+                            
+                            <div class="theme-card" data-theme="cyber">
+                                <div class="theme-card-glow"></div>
+                                <div class="theme-card-icon">
+                                    <i class="fa-solid fa-grip"></i>
+                                </div>
+                                <div class="theme-card-info">
+                                    <h4>Cyber Grid</h4>
+                                    <p>Reactive neon gridlines & digital glitches</p>
+                                </div>
+                                <div class="theme-card-active-dot"></div>
+                            </div>
+
+                            <div class="theme-card" data-theme="warp">
+                                <div class="theme-card-glow"></div>
+                                <div class="theme-card-icon">
+                                    <i class="fa-solid fa-circle-notch"></i>
+                                </div>
+                                <div class="theme-card-info">
+                                    <h4>Warp Tunnel</h4>
+                                    <p>Hypnotic tunnel depth racing to the frequency</p>
+                                </div>
+                                <div class="theme-card-active-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parameter Controls (Sliders) -->
+                    <div class="settings-group">
+                        <label class="group-label">FINE TUNING</label>
+                        
+                        <div class="slider-field">
+                            <div class="slider-label-row">
+                                <span>Sensitivity</span>
+                                <span id="sensitivity-val">1.0x</span>
+                            </div>
+                            <input type="range" id="sensitivity-control" min="0.5" max="3.0" step="0.1" value="1.0" class="styled-range">
+                        </div>
+
+                        <div class="slider-field">
+                            <div class="slider-label-row">
+                                <span>Particle Count</span>
+                                <span id="particle-val">100</span>
+                            </div>
+                            <input type="range" id="particle-density" min="20" max="250" step="10" value="100" class="styled-range">
+                        </div>
+
+                        <div class="slider-field">
+                            <div class="slider-label-row">
+                                <span>Beat Threshold</span>
+                                <span id="threshold-val">0.7</span>
+                            </div>
+                            <input type="range" id="beat-threshold" min="0.1" max="1.0" step="0.05" value="0.7" class="styled-range">
+                        </div>
+                    </div>
+
+                    <!-- Advanced Render Controls -->
+                    <div class="settings-group">
+                        <label class="group-label">OUTPUT QUALITY</label>
+                        <div class="toggle-field-row">
+                            <span>Bloom FX</span>
+                            <label class="switch">
+                                <input type="checkbox" id="bloom-fx" checked>
+                                <span class="slider-switch"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-field-row">
+                            <span>High Definition</span>
+                            <label class="switch">
+                                <input type="checkbox" id="hd-render" checked>
+                                <span class="slider-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER: RECORDING & EXPORT DASHBOARD -->
+        <footer class="app-footer-record glass-card">
+            <div class="footer-grid">
+                
+                <!-- Status Details -->
+                <div class="record-meta-col">
+                    <div class="section-title-sm">
+                        <i class="fa-solid fa-video text-pink"></i> RECORDING PIPELINE
+                    </div>
+                    <div class="status-indicator-wrapper">
+                        <span class="pulse-record-dot id-pulse-dot" style="display:none;"></span>
+                        <h3 id="record-status">INACTIVE</h3>
+                        <p id="record-message">Ready to encode high-definition visualizer video</p>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="record-action-col">
+                    <button class="record-trigger-btn" id="record-btn">
+                        <span class="btn-shine"></span>
+                        <div class="btn-content">
+                            <i class="fa-solid fa-circle record-circle-ico"></i>
+                            <span class="btn-text">START EXPORT</span>
+                        </div>
+                    </button>
+                    <!-- Stop Recording is sometimes needed in scripts, or the same button acts as toggle. We provide a secondary stop button if script looks for it -->
+                    <button class="record-trigger-btn stop-trigger-btn" id="stop-record-btn" style="display: none;">
+                        <span class="btn-shine"></span>
+                        <div class="btn-content">
+                            <i class="fa-solid fa-square text-white"></i>
+                            <span class="btn-text">STOP RECORD</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Progress Dashboard -->
+                <div class="record-progress-col">
+                    <div class="progress-info-row">
+                        <span>Encoding Progress</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill-gradient" id="record-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-stats-row">
+                        <span>ETA: <span id="record-eta">--:--</span></span>
+                        <span>Frames: <span id="frame-counter">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Download Export Link -->
+                <div class="record-download-col">
+                    <a id="download-link" href="#" class="download-link-btn disabled" download="beat-sync-video.mp4">
+                        <div class="glow-layer"></div>
+                        <i class="fa-solid fa-arrow-down-long"></i>
+                        <span>DOWNLOAD VIDEO</span>
+                    </a>
+                </div>
+
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts reference -->
+    <script src="audio.js" defer></script>
+    <script src="visualizer.js" defer></script>
+    <script src="encoder.js" defer></script>
+    <script src="app.js" defer></script>
+    
+    <!-- UI Layout Interactivity glue (For selection cards -> select synchronization and dragover effects) -->
+    <script>
+        function initUI() {
+            // Drop zone styling events
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('audio-input');
+            
+            if (dropZone && fileInput) {
+                dropZone.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                ['dragleave', 'drop'].forEach(event => {
+                    dropZone.addEventListener(event, () => {
+                        dropZone.classList.remove('dragover');
+                    });
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    if (fileInput.files.length > 0) {
+                        handleFileLoaded(fileInput.files[0]);
+                    }
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        handleFileLoaded(e.dataTransfer.files[0]);
+                    }
+                });
+            }
+
+            function handleFileLoaded(file) {
+                const nameDisplay = document.getElementById('uploaded-file-name');
+                const defaultContent = dropZone.querySelector('.upload-zone-content');
+                const successContent = dropZone.querySelector('.upload-success-state');
+                const trackTitle = document.getElementById('track-title');
+                const trackArtist = document.getElementById('track-artist');
+
+                if (nameDisplay && defaultContent && successContent) {
+                    nameDisplay.textContent = file.name;
+                    defaultContent.style.display = 'none';
+                    successContent.style.display = 'flex';
+                }
+
+                if (trackTitle && trackArtist) {
+                    // Strip extension
+                    const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    const parts = baseName.split(' - ');
+                    if (parts.length > 1) {
+                        trackArtist.textContent = parts[0];
+                        trackTitle.textContent = parts.slice(1).join(' - ');
+                    } else {
+                        trackTitle.textContent = baseName;
+                        trackArtist.textContent = 'Local Audio Source';
+                    }
+                }
+            }
+
+            const changeBtn = document.getElementById('change-audio-btn');
+            if (changeBtn) {
+                changeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop clicking drop-zone again
+                    fileInput.click();
+                });
+            }
+
+            // Sync visual cards with hidden select
+            const themeCards = document.querySelectorAll('.theme-card');
+            const themeSelect = document.getElementById('theme-select');
+            const hudTheme = document.getElementById('hud-theme-name');
+
+            themeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    themeCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    
+                    const themeVal = card.getAttribute('data-theme');
+                    if (themeSelect) {
+                        themeSelect.value = themeVal;
+                        // Trigger change event programmatically in case JS file has change listener
+                        themeSelect.dispatchEvent(new Event('change'));
+                    }
+
+                    if (hudTheme) {
+                        hudTheme.textContent = card.querySelector('.theme-card-info h4').textContent.toUpperCase();
+                    }
+                });
+            });
+
+            // If the select value is changed externally, update the theme cards
+            if (themeSelect) {
+                themeSelect.addEventListener('change', () => {
+                    const val = themeSelect.value;
+                    themeCards.forEach(card => {
+                        if (card.getAttribute('data-theme') === val) {
+                            themeCards.forEach(c => c.classList.remove('active'));
+                            card.classList.add('active');
+                            if (hudTheme) {
+                                hudTheme.textContent = card.querySelector('.theme-card-info h4').textContent.toUpperCase();
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Sliders indicator updates
+            const sliderIndicators = [
+                { sliderId: 'sensitivity-control', valId: 'sensitivity-val', suffix: 'x' },
+                { sliderId: 'particle-density', valId: 'particle-val', suffix: '' },
+                { sliderId: 'beat-threshold', valId: 'threshold-val', suffix: '' }
+            ];
+
+            sliderIndicators.forEach(item => {
+                const slider = document.getElementById(item.sliderId);
+                const display = document.getElementById(item.valId);
+                if (slider && display) {
+                    slider.addEventListener('input', () => {
+                        display.textContent = slider.value + item.suffix;
+                    });
+                }
+            });
+
+            // UI Fullscreen toggle
+            const fullscreenBtn = document.getElementById('toggle-fullscreen');
+            const canvasContainer = document.querySelector('.canvas-viewport');
+            if (fullscreenBtn && canvasContainer) {
+                fullscreenBtn.addEventListener('click', () => {
+                    if (!document.fullscreenElement) {
+                        canvasContainer.requestFullscreen().catch(err => {
+                            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initUI);
+        } else {
+            initUI();
+        }
+    </script>
+</body>
+</html>
