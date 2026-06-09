@@ -638,6 +638,8 @@ body {
 .aspect-icon.ar-16-9 { height: 19px; }   /* 34 / (16/9) ≈ 19 */
 .aspect-icon.ar-1-1  { width: 26px; height: 26px; }
 .aspect-icon.ar-4-3  { width: 30px; height: 22px; } /* 30 / (4/3) ≈ 22 */
+.aspect-icon.ar-9-16 { width: 19px; height: 34px; } /* portrait 9:16 */
+.aspect-icon.ar-3-4  { width: 22px; height: 30px; } /* portrait 3:4 */
 
 .aspect-label {
     font-family: var(--font-display);
