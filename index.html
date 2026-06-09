@@ -115,7 +115,7 @@
                         <h2>Viewport Render</h2>
                     </div>
                     <div class="viewport-hud">
-                        <span class="hud-item"><i class="fa-solid fa-expand"></i> 1920x1080</span>
+                        <span class="hud-item"><i class="fa-solid fa-expand"></i> <span id="resolution-badge">1920x1080</span></span>
                         <span class="hud-item fps-counter"><i class="fa-solid fa-bolt"></i> <span id="fps-val">60</span> FPS</span>
                     </div>
                 </div>
@@ -274,6 +274,25 @@
                                 <span id="threshold-val">0.7</span>
                             </div>
                             <input type="range" id="beat-threshold" min="0.1" max="1.0" step="0.05" value="0.7" class="styled-range">
+                        </div>
+                    </div>
+
+                    <!-- Output Aspect Ratio Selector -->
+                    <div class="settings-group">
+                        <label class="group-label">ASPECT RATIO</label>
+                        <div class="aspect-ratio-group" id="aspect-ratio-group" role="group" aria-label="Output aspect ratio">
+                            <button type="button" class="aspect-btn active" data-ar="16:9">
+                                <span class="aspect-icon ar-16-9"></span>
+                                <span class="aspect-label">16:9</span>
+                            </button>
+                            <button type="button" class="aspect-btn" data-ar="1:1">
+                                <span class="aspect-icon ar-1-1"></span>
+                                <span class="aspect-label">1:1</span>
+                            </button>
+                            <button type="button" class="aspect-btn" data-ar="4:3">
+                                <span class="aspect-icon ar-4-3"></span>
+                                <span class="aspect-label">4:3</span>
+                            </button>
                         </div>
                     </div>
 

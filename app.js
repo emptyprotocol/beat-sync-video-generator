@@ -120,6 +120,63 @@ function startApp() {
   if (bloomFx) {
     bloomFx.addEventListener('change', updateVisualizerSettings);
   }
+
+  // 3.5. Output aspect ratio selector (16:9, 1:1, 4:3)
+  function renderStaticFrame() {
+    visualizer.render({
+      frequencyData: new Uint8Array(128),
+      waveformData: new Uint8Array(128),
+      isBeat: false,
+      beatIntensity: 0
+    });
+  }
+
+  const aspectButtons = document.querySelectorAll('.aspect-btn');
+  const resolutionBadge = document.getElementById('resolution-badge');
+  function parseAspectRatio(str) {
+    const parts = (str || '').split(':');
+    const w = parseFloat(parts[0]);
+    const h = parseFloat(parts[1]);
+    if (isFinite(w) && isFinite(h) && h > 0) return w / h;
+    return null;
+  }
+
+  // Reflect the actual output resolution (canvas drawing buffer) in the HUD badge.
+  function updateResolutionBadge() {
+    if (resolutionBadge) {
+      resolutionBadge.textContent = `${canvas.width}x${canvas.height}`;
+    }
+  }
+
+  aspectButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ratio = parseAspectRatio(btn.getAttribute('data-ar'));
+      if (ratio === null) return;
+
+      aspectButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      visualizer.setAspectRatio(ratio);
+      updateResolutionBadge();
+
+      // Redraw immediately so the new shape is visible even when paused/stopped.
+      if (!audio.isPlaying) {
+        renderStaticFrame();
+      }
+    });
+  });
+
+  // Apply the initially-selected aspect ratio (defaults to 16:9) once the
+  // layout has settled, so the canvas buffer matches its viewport.
+  const initialAspectBtn = document.querySelector('.aspect-btn.active');
+  if (initialAspectBtn) {
+    const initialRatio = parseAspectRatio(initialAspectBtn.getAttribute('data-ar'));
+    if (initialRatio !== null) visualizer.setAspectRatio(initialRatio);
+  }
+  updateResolutionBadge();
+
+  // Keep the resolution badge in sync when the window (and viewport) resizes.
+  window.addEventListener('resize', updateResolutionBadge);
   
   // 4. Connect Audio engine callbacks
   audio.on('loadstart', () => {

@@ -578,10 +578,70 @@ body {
 }
 
 #visualizer-canvas {
-    width: 100%;
-    height: 100%;
     display: block;
-    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+    /* Width/height are set inline by the visualizer to letterbox the canvas
+       to the selected output aspect ratio (16:9, 1:1, 4:3). */
+}
+
+/* --- Aspect Ratio Selector --- */
+.aspect-ratio-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.aspect-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.aspect-btn:hover {
+    border-color: var(--color-border-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.aspect-btn.active {
+    border-color: var(--color-cyan);
+    color: var(--text-primary);
+    background: rgba(0, 220, 255, 0.08);
+    box-shadow: 0 0 14px var(--color-cyan-glow), inset 0 0 10px rgba(0, 220, 255, 0.08);
+}
+
+.aspect-icon {
+    display: block;
+    width: 34px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    opacity: 0.85;
+}
+
+.aspect-btn.active .aspect-icon {
+    box-shadow: 0 0 8px var(--color-cyan-glow);
+}
+
+.aspect-icon.ar-16-9 { height: 19px; }   /* 34 / (16/9) ≈ 19 */
+.aspect-icon.ar-1-1  { width: 26px; height: 26px; }
+.aspect-icon.ar-4-3  { width: 30px; height: 22px; } /* 30 / (4/3) ≈ 22 */
+
+.aspect-label {
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
 }
 
 /* Canvas HUD HUD Overlay */

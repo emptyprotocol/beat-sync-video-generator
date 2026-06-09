@@ -20,6 +20,11 @@ class Visualizer {
     
     // Selected theme: 'cosmic-pulse', 'cyber-grid', 'warp-tunnel'
     this.theme = 'cosmic-pulse';
+
+    // Output aspect ratio (width / height). Drives the canvas drawing-buffer
+    // dimensions and therefore the resolution/shape of the recorded video.
+    // Defaults to 16:9.
+    this.aspectRatio = 16 / 9;
     
     // Timing and animation state
     this.lastTime = performance.now();
@@ -37,28 +42,63 @@ class Visualizer {
   }
 
   /**
+   * Sets the output aspect ratio (width / height) and re-fits the canvas.
+   * The drawing buffer is sized to match this ratio, so recorded video keeps
+   * the exact shape selected by the user (e.g. 16:9, 1:1, 4:3).
+   * @param {number} ratio - width divided by height (e.g. 16/9, 1, 4/3).
+   */
+  setAspectRatio(ratio) {
+    if (typeof ratio === 'number' && isFinite(ratio) && ratio > 0) {
+      this.aspectRatio = ratio;
+      this.resize();
+    } else {
+      console.warn(`Invalid aspect ratio requested: ${ratio}. Keeping current: ${this.aspectRatio}`);
+    }
+  }
+
+  /**
    * Handles canvas size calculations, supporting retina/High-DPI displays.
+   * The canvas is letterboxed inside its viewport so it always keeps the
+   * selected output aspect ratio.
    */
   resize() {
     const dpr = window.devicePixelRatio || 1;
-    let width = this.canvas.clientWidth;
-    let height = this.canvas.clientHeight;
-    
-    // Fallback if clientWidth/Height are not yet set
-    if (width === 0 || height === 0) {
-      width = this.canvas.parentElement ? this.canvas.parentElement.clientWidth : window.innerWidth;
-      height = this.canvas.parentElement ? this.canvas.parentElement.clientHeight : window.innerHeight;
+    const parent = this.canvas.parentElement;
+
+    // Available space within the viewport container.
+    let availW = parent ? parent.clientWidth : window.innerWidth;
+    let availH = parent ? parent.clientHeight : window.innerHeight;
+
+    // Fallback if the container has not been laid out yet.
+    if (availW === 0 || availH === 0) {
+      availW = window.innerWidth;
+      availH = window.innerHeight;
     }
-    
-    this.canvas.width = width * dpr;
-    this.canvas.height = height * dpr;
-    
+
+    // Fit a box of the chosen aspect ratio inside the available space (letterbox).
+    const ar = this.aspectRatio || (availW / availH);
+    let dispW = availW;
+    let dispH = dispW / ar;
+    if (dispH > availH) {
+      dispH = availH;
+      dispW = dispH * ar;
+    }
+
+    // Apply the computed display size to the element (CSS pixels).
+    this.canvas.style.width = dispW + 'px';
+    this.canvas.style.height = dispH + 'px';
+
+    // Size the drawing buffer for High-DPI sharpness; this also defines the
+    // recorded video resolution.
+    this.canvas.width = Math.max(1, Math.round(dispW * dpr));
+    this.canvas.height = Math.max(1, Math.round(dispH * dpr));
+
     // Reset transform before scaling to avoid accumulating scale
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
-    
-    this.width = width;
-    this.height = height;
+
+    this.width = dispW;
+    this.height = dispH;
   }
 
   /**
