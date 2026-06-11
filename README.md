@@ -7,7 +7,7 @@ as a video — all client-side, no server or installation required.
 ## Features
 
 - 🎵 **Audio analysis** — load a local audio file and analyze it in real time using the Web Audio API (BPM detection, waveform/frequency data).
-- 🌈 **Beat-synced visuals** — a canvas-based visualizer that reacts to the music.
+- 🌈 **Beat-synced visuals** — six canvas-based visualizer themes that react to the music: Cosmic Pulse, Cyber Grid, Warp Tunnel, Aurora Flow, Kaleido Bloom, and Matrix Rain.
 - 🎬 **Video recording** — capture the visualization to a downloadable video file via `MediaRecorder`.
 - 🎛️ **Playback controls** — play / pause / stop, scrubbing, volume, and mute.
 - ⚡ **100% client-side** — everything runs in the browser; nothing is uploaded.

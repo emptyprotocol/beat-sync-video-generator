@@ -1,10 +1,13 @@
 /**
  * Visualizer.js
- * 
- * Provides three distinct, interactive, and audio-reactive 2D Canvas themes:
+ *
+ * Provides six distinct, interactive, and audio-reactive 2D Canvas themes:
  * 1. Cosmic Pulse (pulsing glassmorphic spheres, rotating orbits, orbital particle trails)
  * 2. Cyber Grid & Spectrum (glowing frequency bars, perspective lines, floating neon waveform)
  * 3. Warp Tunnel (3D scrolling starfield/particle tunnel accelerating with beats)
+ * 4. Aurora Flow (layered flowing aurora ribbons with drifting fireflies)
+ * 5. Kaleido Bloom (mirrored kaleidoscope mandala of frequency petals)
+ * 6. Matrix Rain (falling digital glyph columns racing with the music)
  */
 
 class Visualizer {
@@ -18,7 +21,8 @@ class Visualizer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     
-    // Selected theme: 'cosmic-pulse', 'cyber-grid', 'warp-tunnel'
+    // Selected theme: 'cosmic-pulse', 'cyber-grid', 'warp-tunnel',
+    // 'aurora-flow', 'kaleido-bloom', 'matrix-rain'
     this.theme = 'cosmic-pulse';
 
     // Output aspect ratio (width / height). Drives the canvas drawing-buffer
@@ -35,6 +39,9 @@ class Visualizer {
     this.initCosmicPulse();
     this.initCyberGrid();
     this.initWarpTunnel();
+    this.initAuroraFlow();
+    this.initKaleidoBloom();
+    this.initMatrixRain();
     
     // Set initial size and listen for resize events
     this.resize();
@@ -103,10 +110,14 @@ class Visualizer {
 
   /**
    * Switches the visualizer theme.
-   * @param {string} themeName - 'cosmic-pulse', 'cyber-grid', or 'warp-tunnel'
+   * @param {string} themeName - 'cosmic-pulse', 'cyber-grid', 'warp-tunnel',
+   *   'aurora-flow', 'kaleido-bloom', or 'matrix-rain'
    */
   setTheme(themeName) {
-    const validThemes = ['cosmic-pulse', 'cyber-grid', 'warp-tunnel'];
+    const validThemes = [
+      'cosmic-pulse', 'cyber-grid', 'warp-tunnel',
+      'aurora-flow', 'kaleido-bloom', 'matrix-rain'
+    ];
     if (validThemes.includes(themeName)) {
       this.theme = themeName;
     } else {
@@ -156,12 +167,24 @@ class Visualizer {
       // Semi-transparent deep indigo background for particle orbital trails
       this.ctx.fillStyle = 'rgba(8, 6, 18, 0.16)';
       this.ctx.fillRect(0, 0, this.width, this.height);
+    } else if (this.theme === 'aurora-flow') {
+      // Deep teal night sky with soft fade for ribbon afterglow
+      this.ctx.fillStyle = 'rgba(2, 9, 16, 0.2)';
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    } else if (this.theme === 'kaleido-bloom') {
+      // Dark violet fade leaves short mandala trails
+      this.ctx.fillStyle = 'rgba(6, 3, 14, 0.2)';
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    } else if (this.theme === 'matrix-rain') {
+      // Near-black green fade produces the classic glyph trails
+      this.ctx.fillStyle = 'rgba(2, 10, 5, 0.16)';
+      this.ctx.fillRect(0, 0, this.width, this.height);
     } else {
       // Solid clean space black/blue for Cyber Grid
       this.ctx.fillStyle = '#030209';
       this.ctx.fillRect(0, 0, this.width, this.height);
     }
-    
+
     // Draw the active theme visual elements
     switch (this.theme) {
       case 'cosmic-pulse':
@@ -172,6 +195,15 @@ class Visualizer {
         break;
       case 'warp-tunnel':
         this.drawWarpTunnel(freq, wave, this.beatPulse, clampedDt);
+        break;
+      case 'aurora-flow':
+        this.drawAuroraFlow(freq, wave, this.beatPulse, clampedDt);
+        break;
+      case 'kaleido-bloom':
+        this.drawKaleidoBloom(freq, wave, this.beatPulse, clampedDt);
+        break;
+      case 'matrix-rain':
+        this.drawMatrixRain(freq, wave, this.beatPulse, clampedDt);
         break;
     }
     
@@ -185,17 +217,21 @@ class Visualizer {
   initCosmicPulse() {
     this.cosmicParticles = [];
     const particleCount = 100;
-    
+
     for (let i = 0; i < particleCount; i++) {
-      this.cosmicParticles.push({
-        angle: Math.random() * Math.PI * 2,
-        speed: 0.15 + Math.random() * 0.55,
-        baseRadius: 60 + Math.random() * 220,
-        size: 0.8 + Math.random() * 2.2,
-        colorHue: 250 + Math.random() * 70, // Blueish purple to magenta
-        opacity: 0.3 + Math.random() * 0.6
-      });
+      this.cosmicParticles.push(this.spawnCosmicParticle());
     }
+  }
+
+  spawnCosmicParticle() {
+    return {
+      angle: Math.random() * Math.PI * 2,
+      speed: 0.15 + Math.random() * 0.55,
+      baseRadius: 60 + Math.random() * 220,
+      size: 0.8 + Math.random() * 2.2,
+      colorHue: 250 + Math.random() * 70, // Blueish purple to magenta
+      opacity: 0.3 + Math.random() * 0.6
+    };
   }
   
   drawCosmicPulse(freq, wave, beat, dt) {
@@ -465,18 +501,22 @@ class Visualizer {
     this.maxWarpDepth = 1000;
     this.warpFov = 280;
     const starCount = 200;
-    
+
     for (let i = 0; i < starCount; i++) {
-      this.warpStars.push({
-        x: (Math.random() - 0.5) * 750,
-        y: (Math.random() - 0.5) * 750,
-        z: Math.random() * this.maxWarpDepth,
-        prevZ: 0,
-        colorHue: 180 + Math.random() * 60, // Cyan to blue hues
-        angle: Math.random() * Math.PI * 2,
-        spinSpeed: (Math.random() - 0.5) * 0.3
-      });
+      this.warpStars.push(this.spawnWarpStar());
     }
+  }
+
+  spawnWarpStar() {
+    return {
+      x: (Math.random() - 0.5) * 750,
+      y: (Math.random() - 0.5) * 750,
+      z: Math.random() * this.maxWarpDepth,
+      prevZ: 0,
+      colorHue: 180 + Math.random() * 60, // Cyan to blue hues
+      angle: Math.random() * Math.PI * 2,
+      spinSpeed: (Math.random() - 0.5) * 0.3
+    };
   }
   
   drawWarpTunnel(freq, wave, beat, dt) {
@@ -564,6 +604,391 @@ class Visualizer {
     this.ctx.beginPath();
     this.ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
     this.ctx.fill();
+  }
+
+  /* =========================================================================
+   * THEME 4: AURORA FLOW
+   * ========================================================================= */
+
+  initAuroraFlow() {
+    this.auroraRibbons = [];
+    const ribbonCount = 5;
+
+    for (let i = 0; i < ribbonCount; i++) {
+      this.auroraRibbons.push({
+        baseY: 0.26 + (i / (ribbonCount - 1)) * 0.34, // Vertical anchor (fraction of height)
+        hue: 132 + i * 26,                            // Green through cyan to violet
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.3 + Math.random() * 0.35,
+        amplitude: 0.05 + Math.random() * 0.06        // Wave height (fraction of height)
+      });
+    }
+
+    this.auroraFireflies = [];
+    const fireflyCount = 60;
+    for (let i = 0; i < fireflyCount; i++) {
+      this.auroraFireflies.push(this.spawnAuroraFirefly());
+    }
+  }
+
+  spawnAuroraFirefly() {
+    // Positions and velocities are normalized (0-1) so resizing is safe
+    return {
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.04,
+      vy: -(0.02 + Math.random() * 0.06),
+      size: 0.7 + Math.random() * 1.8,
+      hue: 120 + Math.random() * 160, // Green through cyan to violet
+      opacity: 0.25 + Math.random() * 0.5,
+      flicker: Math.random() * Math.PI * 2
+    };
+  }
+
+  drawAuroraFlow(freq, wave, beat, dt) {
+    // Split the spectrum into low/mid/high band averages
+    let lowSum = 0;
+    let midSum = 0;
+    let highSum = 0;
+    const lowBoundary = Math.floor(freq.length * 0.12);
+    const midBoundary = Math.floor(freq.length * 0.5);
+
+    for (let i = 0; i < lowBoundary; i++) lowSum += freq[i];
+    for (let i = lowBoundary; i < midBoundary; i++) midSum += freq[i];
+    for (let i = midBoundary; i < freq.length; i++) highSum += freq[i];
+
+    const lowAvg = lowBoundary > 0 ? (lowSum / lowBoundary) / 255 : 0;
+    const midAvg = (midBoundary - lowBoundary) > 0 ? (midSum / (midBoundary - lowBoundary)) / 255 : 0;
+    const highAvg = (freq.length - midBoundary) > 0 ? (highSum / (freq.length - midBoundary)) / 255 : 0;
+
+    // Distant twinkling stars in the upper sky
+    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    for (let i = 0; i < 30; i++) {
+      const x = (Math.sin(i * 411.7) * 0.5 + 0.5) * this.width;
+      const y = (Math.cos(i * 733.1) * 0.5 + 0.5) * this.height * 0.7;
+      const r = (Math.sin(i * 97.3 + this.time * 1.6) * 0.5 + 0.5) * 1.1;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, r, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // Ribbons blend additively so overlaps glow
+    this.ctx.globalCompositeOperation = 'lighter';
+
+    const steps = 48;
+    this.auroraRibbons.forEach((ribbon, idx) => {
+      // Lower ribbons follow bass, middle follow mids, upper follow highs
+      const energy = idx < 2 ? lowAvg : (idx < 4 ? midAvg : highAvg);
+      const amp = ribbon.amplitude * this.height * (0.6 + energy * 2.2 + beat * 0.9);
+      const thickness = this.height * 0.07 * (0.7 + energy * 1.6 + beat * 0.8);
+      const baseY = ribbon.baseY * this.height;
+      const hue = ribbon.hue + Math.sin(this.time * 0.3 + ribbon.phase) * 18 + beat * 20;
+
+      // Centerline of the curtain: two stacked sine octaves
+      const points = [];
+      for (let s = 0; s <= steps; s++) {
+        const t = s / steps;
+        const yWave =
+          Math.sin(t * Math.PI * 3 + this.time * ribbon.speed * 2.0 + ribbon.phase) * amp +
+          Math.sin(t * Math.PI * 7 - this.time * ribbon.speed * 1.3 + ribbon.phase * 2) * amp * 0.35;
+        points.push({ x: t * this.width, y: baseY + yWave });
+      }
+
+      const grad = this.ctx.createLinearGradient(0, baseY - thickness, 0, baseY + thickness);
+      grad.addColorStop(0, `hsla(${hue}, 90%, 60%, 0)`);
+      grad.addColorStop(0.5, `hsla(${hue}, 90%, 62%, ${0.16 + energy * 0.3 + beat * 0.18})`);
+      grad.addColorStop(1, `hsla(${hue + 30}, 90%, 55%, 0)`);
+
+      this.ctx.fillStyle = grad;
+      this.ctx.beginPath();
+      points.forEach((p, i) => {
+        if (i === 0) this.ctx.moveTo(p.x, p.y - thickness);
+        else this.ctx.lineTo(p.x, p.y - thickness);
+      });
+      for (let s = steps; s >= 0; s--) {
+        this.ctx.lineTo(points[s].x, points[s].y + thickness);
+      }
+      this.ctx.closePath();
+      this.ctx.fill();
+    });
+
+    // Drifting fireflies rise faster with the highs and flicker softly
+    this.auroraFireflies.forEach(p => {
+      p.x += p.vx * dt * (1 + beat);
+      p.y += p.vy * dt * (1 + highAvg * 2 + beat * 1.5);
+      p.flicker += dt * 4;
+
+      if (p.x < -0.05) p.x = 1.05;
+      if (p.x > 1.05) p.x = -0.05;
+      if (p.y < -0.05) {
+        Object.assign(p, this.spawnAuroraFirefly());
+        p.y = 1.05; // Re-enter from the bottom
+      }
+
+      const twinkle = Math.sin(p.flicker) * 0.5 + 0.5;
+      this.ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.opacity * (0.4 + twinkle * 0.6)})`;
+      this.ctx.shadowBlur = 6;
+      this.ctx.shadowColor = `hsl(${p.hue}, 90%, 70%)`;
+      this.ctx.beginPath();
+      this.ctx.arc(p.x * this.width, p.y * this.height, p.size * (1 + beat * 0.8), 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+
+    this.ctx.shadowBlur = 0;
+    this.ctx.globalCompositeOperation = 'source-over';
+
+    // Soft glowing ground reflection at the bottom
+    const groundGrad = this.ctx.createLinearGradient(0, this.height * 0.82, 0, this.height);
+    groundGrad.addColorStop(0, 'rgba(40, 120, 110, 0)');
+    groundGrad.addColorStop(1, `rgba(60, 170, 150, ${0.08 + lowAvg * 0.12 + beat * 0.1})`);
+    this.ctx.fillStyle = groundGrad;
+    this.ctx.fillRect(0, this.height * 0.82, this.width, this.height * 0.18);
+  }
+
+  /* =========================================================================
+   * THEME 5: KALEIDO BLOOM
+   * ========================================================================= */
+
+  initKaleidoBloom() {
+    this.kaleidoRotation = 0;
+    this.kaleidoSegments = 8;
+    this.kaleidoSparks = [];
+    const sparkCount = 60;
+
+    for (let i = 0; i < sparkCount; i++) {
+      this.kaleidoSparks.push(this.spawnKaleidoSpark());
+    }
+  }
+
+  spawnKaleidoSpark() {
+    return {
+      dist: 0.1 + Math.random() * 0.85,   // Normalized fraction of the mandala radius
+      angle: Math.random() * Math.PI * 2,
+      speed: 0.25 + Math.random() * 0.7,
+      drift: 0.02 + Math.random() * 0.06, // Outward spiral speed
+      size: 0.8 + Math.random() * 1.6,
+      hueOffset: Math.random() * 90,
+      opacity: 0.25 + Math.random() * 0.5
+    };
+  }
+
+  drawKaleidoBloom(freq, wave, beat, dt) {
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const maxR = Math.min(this.width, this.height) * 0.46;
+
+    let lowSum = 0;
+    const lowBoundary = Math.floor(freq.length * 0.12);
+    for (let i = 0; i < lowBoundary; i++) lowSum += freq[i];
+    const lowAvg = lowBoundary > 0 ? (lowSum / lowBoundary) / 255 : 0;
+
+    // The mandala spins slowly; beats kick the rotation forward
+    this.kaleidoRotation += dt * (0.12 + beat * 1.1 + lowAvg * 0.35);
+    const hueBase = (this.time * 18) % 360;
+
+    const segments = this.kaleidoSegments;
+    const segAngle = (Math.PI * 2) / segments;
+    const petalSteps = 22;
+    const innerR = maxR * (0.08 + beat * 0.05);
+
+    // Advance orbiting sparks once per frame (drawn mirrored in every wedge)
+    this.kaleidoSparks.forEach(p => {
+      p.angle += p.speed * dt * (1 + beat * 2.0);
+      p.dist += p.drift * dt * (1 + beat * 3.0);
+      if (p.dist > 1.0) {
+        Object.assign(p, this.spawnKaleidoSpark());
+        p.dist = 0.08;
+      }
+    });
+
+    this.ctx.globalCompositeOperation = 'lighter';
+
+    for (let s = 0; s < segments; s++) {
+      this.ctx.save();
+      this.ctx.translate(cx, cy);
+      this.ctx.rotate(s * segAngle + this.kaleidoRotation);
+      if (s % 2 === 1) this.ctx.scale(1, -1); // Mirror alternate wedges for the kaleidoscope seam
+
+      // Frequency petal: radius traces the spectrum across the wedge.
+      // A gentle idle wave keeps the mandala breathing during silence.
+      this.ctx.beginPath();
+      for (let j = 0; j <= petalSteps; j++) {
+        const t = j / petalSteps;
+        const freqIdx = Math.floor(t * Math.min(freq.length - 1, 56));
+        const f = Math.pow(freq[freqIdx] / 255, 1.35);
+        const idle = 0.5 + 0.5 * Math.sin(this.time * 1.5 + t * Math.PI * 2);
+        const reach = f * 0.85 + idle * 0.15;
+        const r = innerR + reach * (maxR - innerR) * (0.55 + beat * 0.45);
+        const a = (t - 0.5) * segAngle;
+        const px = Math.cos(a) * r;
+        const py = Math.sin(a) * r;
+        if (j === 0) this.ctx.moveTo(px, py);
+        else this.ctx.lineTo(px, py);
+      }
+      this.ctx.closePath();
+
+      const hue = (hueBase + s * (360 / segments) * 0.25) % 360;
+      this.ctx.fillStyle = `hsla(${hue}, 85%, 55%, ${0.07 + beat * 0.08})`;
+      this.ctx.strokeStyle = `hsla(${hue}, 95%, 68%, ${0.5 + beat * 0.4})`;
+      this.ctx.lineWidth = 1.4 + beat * 1.2;
+      this.ctx.shadowBlur = 10 + beat * 14;
+      this.ctx.shadowColor = `hsl(${hue}, 95%, 60%)`;
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      // Sparks drawn per wedge so they mirror kaleidoscopically (no glow: cheap)
+      this.ctx.shadowBlur = 0;
+      this.kaleidoSparks.forEach(p => {
+        const px = Math.cos(p.angle) * p.dist * maxR;
+        const py = Math.sin(p.angle) * p.dist * maxR;
+        this.ctx.fillStyle = `hsla(${(hueBase + p.hueOffset) % 360}, 90%, 72%, ${p.opacity})`;
+        this.ctx.beginPath();
+        this.ctx.arc(px, py, p.size * (1 + beat * 0.6), 0, Math.PI * 2);
+        this.ctx.fill();
+      });
+
+      this.ctx.restore();
+    }
+
+    // Expanding shockwave ring on each beat
+    if (beat > 0.01) {
+      const ringR = innerR + (1 - beat) * maxR;
+      this.ctx.strokeStyle = `hsla(${hueBase}, 90%, 75%, ${beat * 0.55})`;
+      this.ctx.lineWidth = 2 + beat * 3;
+      this.ctx.shadowBlur = 18;
+      this.ctx.shadowColor = `hsla(${hueBase}, 90%, 70%, ${beat})`;
+      this.ctx.beginPath();
+      this.ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+
+    // Bright central jewel
+    const coreR = Math.max(3, innerR * 0.7) + beat * 6;
+    const coreGrad = this.ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.5);
+    coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    coreGrad.addColorStop(0.35, `hsla(${hueBase}, 95%, 70%, 0.5)`);
+    coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    this.ctx.shadowBlur = 0;
+    this.ctx.fillStyle = coreGrad;
+    this.ctx.beginPath();
+    this.ctx.arc(cx, cy, coreR * 2.5, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    this.ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* =========================================================================
+   * THEME 6: MATRIX RAIN
+   * ========================================================================= */
+
+  initMatrixRain() {
+    this.matrixGlyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ0123456789ABCDEFXZ$#%*+-<>';
+    this.matrixFontSize = 16;
+    this.matrixColumns = [];
+  }
+
+  spawnMatrixColumn() {
+    return {
+      head: -Math.random() * 40,     // Row index of the bright head (starts above the screen)
+      speed: 6 + Math.random() * 14, // Rows per second at neutral volume
+      glyphSeed: Math.floor(Math.random() * 1000)
+    };
+  }
+
+  rebuildMatrixColumns(colCount) {
+    this.matrixColumns = [];
+    for (let i = 0; i < colCount; i++) {
+      this.matrixColumns.push(this.spawnMatrixColumn());
+    }
+  }
+
+  drawMatrixRain(freq, wave, beat, dt) {
+    // Font scales with canvas size; columns rebuild lazily on resize
+    const fontSize = Math.max(12, Math.round(Math.min(this.width, this.height) / 42));
+    this.matrixFontSize = fontSize;
+    const colCount = Math.ceil(this.width / fontSize);
+    if (this.matrixColumns.length !== colCount) {
+      this.rebuildMatrixColumns(colCount);
+    }
+
+    let totalVol = 0;
+    for (let i = 0; i < freq.length; i++) totalVol += freq[i];
+    const avgVol = freq.length > 0 ? (totalVol / freq.length) / 255 : 0;
+
+    const rows = this.height / fontSize;
+    this.ctx.font = `${fontSize}px "Courier New", monospace`;
+    this.ctx.textBaseline = 'top';
+
+    this.matrixColumns.forEach((col, i) => {
+      // Column speed surges with overall volume and beats
+      const speedMult = 0.6 + avgVol * 2.2 + beat * 2.6;
+      col.head += col.speed * speedMult * dt;
+
+      // Brightness of this column follows its own frequency bin
+      const freqIdx = Math.floor((i / colCount) * (freq.length - 1));
+      const f = freq[freqIdx] / 255;
+
+      const x = i * fontSize;
+      const headRow = Math.floor(col.head);
+      const y = headRow * fontSize;
+
+      if (y > -fontSize && y < this.height) {
+        // Pseudo-random glyph that changes as the head advances
+        const glyphIdx = Math.abs(col.glyphSeed + headRow * 31 + i * 7) % this.matrixGlyphs.length;
+        const glyph = this.matrixGlyphs[glyphIdx];
+
+        // Head glyph: white-hot cyan on beats, otherwise bright green
+        if (beat > 0.5) {
+          this.ctx.fillStyle = `hsla(${160 + f * 40}, 100%, ${80 + beat * 15}%, 0.95)`;
+        } else {
+          this.ctx.fillStyle = `hsla(130, 95%, ${55 + f * 35}%, ${0.7 + f * 0.3})`;
+        }
+        this.ctx.shadowBlur = 6 + beat * 8;
+        this.ctx.shadowColor = 'rgba(0, 255, 140, 0.8)';
+        this.ctx.fillText(glyph, x, y);
+
+        // One dimmer trailing glyph reinforces the fade trail
+        const trailIdx = Math.abs(col.glyphSeed + (headRow - 1) * 31 + i * 7) % this.matrixGlyphs.length;
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillStyle = `hsla(130, 90%, 45%, ${0.35 + f * 0.3})`;
+        this.ctx.fillText(this.matrixGlyphs[trailIdx], x, y - fontSize);
+      }
+
+      // Recycle the column once it has fully fallen below the canvas
+      if (col.head > rows + 6) {
+        Object.assign(col, this.spawnMatrixColumn());
+      }
+    });
+
+    this.ctx.shadowBlur = 0;
+
+    // Subtle full-field flash on beats
+    if (beat > 0.01) {
+      const flashGrad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+      flashGrad.addColorStop(0, 'rgba(120, 255, 190, 0)');
+      flashGrad.addColorStop(0.5, `rgba(120, 255, 190, ${beat * 0.06})`);
+      flashGrad.addColorStop(1, 'rgba(120, 255, 190, 0)');
+      this.ctx.fillStyle = flashGrad;
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    }
+  }
+
+  /**
+   * Adjusts how many particles each particle-based theme uses.
+   * Applies to Cosmic Pulse orbiters, Warp Tunnel stars, Aurora fireflies,
+   * and Kaleido sparks. (Cyber Grid and Matrix Rain are layout-driven.)
+   * @param {number} density - Target particle count.
+   */
+  setParticleDensity(density) {
+    if (!Number.isFinite(density) || density < 1) return;
+    const fit = (arr, spawn) => {
+      while (arr.length < density) arr.push(spawn());
+      if (arr.length > density) arr.length = density;
+    };
+    fit(this.cosmicParticles, () => this.spawnCosmicParticle());
+    fit(this.warpStars, () => this.spawnWarpStar());
+    fit(this.auroraFireflies, () => this.spawnAuroraFirefly());
+    fit(this.kaleidoSparks, () => this.spawnKaleidoSpark());
   }
 }
 

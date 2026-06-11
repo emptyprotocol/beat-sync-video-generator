@@ -68,40 +68,13 @@ function startApp() {
     if (theme === 'cosmic') visualizer.setTheme('cosmic-pulse');
     else if (theme === 'cyber') visualizer.setTheme('cyber-grid');
     else if (theme === 'warp') visualizer.setTheme('warp-tunnel');
-    
-    // Density (particle counts)
+    else if (theme === 'aurora') visualizer.setTheme('aurora-flow');
+    else if (theme === 'kaleido') visualizer.setTheme('kaleido-bloom');
+    else if (theme === 'matrix') visualizer.setTheme('matrix-rain');
+
+    // Density (particle counts) — applied to every particle-based theme
     const density = parseInt(particleDensity.value, 10);
-    if (visualizer.cosmicParticles) {
-      while (visualizer.cosmicParticles.length < density) {
-        visualizer.cosmicParticles.push({
-          angle: Math.random() * Math.PI * 2,
-          speed: 0.15 + Math.random() * 0.55,
-          baseRadius: 60 + Math.random() * 220,
-          size: 0.8 + Math.random() * 2.2,
-          colorHue: 250 + Math.random() * 70,
-          opacity: 0.3 + Math.random() * 0.6
-        });
-      }
-      if (visualizer.cosmicParticles.length > density) {
-        visualizer.cosmicParticles.length = density;
-      }
-    }
-    if (visualizer.warpStars) {
-      while (visualizer.warpStars.length < density) {
-        visualizer.warpStars.push({
-          x: (Math.random() - 0.5) * 750,
-          y: (Math.random() - 0.5) * 750,
-          z: Math.random() * visualizer.maxWarpDepth,
-          prevZ: 0,
-          colorHue: 180 + Math.random() * 60,
-          angle: Math.random() * Math.PI * 2,
-          spinSpeed: (Math.random() - 0.5) * 0.3
-        });
-      }
-      if (visualizer.warpStars.length > density) {
-        visualizer.warpStars.length = density;
-      }
-    }
+    visualizer.setParticleDensity(density);
     
     // Bloom filter
     if (bloomFx && bloomFx.checked) {
